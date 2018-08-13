@@ -1,0 +1,12 @@
+Remote robot framework
+
+There are three projects:
+
+remote-robot - library we use to write tests in test project. Plugin is also need it as dependency
+robot-server-plugin - plugin for idea.
+ui-tests - sample test project
+
+Quick start steps:
+1. remote-robot: run gradle task 'install'. It will build and publish the library to your local maven repository
+2. robot-server-plugin: run gradle task 'runIde'. It will download idea and run it with plugin.
+3. ui-tests: run test SomeSmokeTest#createNewProject.
