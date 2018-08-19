@@ -39,7 +39,7 @@ class RobotServerImpl : RobotServer {
                 post("/component") {
                     call.dataRequest {
                         FindComponentsResponse(
-                                elementList = listOf(findComponent(lambdaContainer = call.receiveJson())))
+                                elementList = listOf(find(lambdaContainer = call.receiveJson())))
                     }
                 }
                 post("/{id}/component") {
@@ -47,7 +47,7 @@ class RobotServerImpl : RobotServer {
                         val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
                         FindComponentsResponse(
                                 elementList = listOf(
-                                        findComponent(
+                                        find(
                                                 containerId = id,
                                                 lambdaContainer = call.receiveJson())
                                 ))
@@ -56,25 +56,29 @@ class RobotServerImpl : RobotServer {
                 post("/components") {
                     call.dataRequest {
                         FindComponentsResponse(
-                                elementList = findComponents(lambdaContainer = call.receiveJson()))
+                                elementList = findAll(lambdaContainer = call.receiveJson()))
                     }
                 }
                 post("/{id}/components") {
                     call.dataRequest {
                         val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
                         FindComponentsResponse(
-                                elementList = findComponents(
+                                elementList = findAll(
                                         containerId = id,
                                         lambdaContainer = call.receiveJson())
                         )
                     }
                 }
-
                 get("/hierarchy") {
                     call.dataRequest {
                         ListResponse(list = hierarchy())
                     }
                     val y: ActionMenu
+                }
+                post("/execute") {
+                    call.commonRequest {
+                        doAction(call.receiveJson())
+                    }
                 }
                 post("/{id}/execute") {
                     call.commonRequest {
@@ -86,6 +90,12 @@ class RobotServerImpl : RobotServer {
                     call.dataRequest {
                         val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
                         CommonResponse(message = retrieveText(id, call.receiveJson()))
+                    }
+                }
+                post("/{id}/retrieveBoolean") {
+                    call.dataRequest {
+                        val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
+                        BooleanResponse(value = retrieveBoolean(id, call.receiveJson()))
                     }
                 }
             }

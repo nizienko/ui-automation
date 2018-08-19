@@ -18,12 +18,24 @@ data class CommonResponse(
 data class FindComponentsResponse(
         override val status: ResponseStatus = SUCCESS,
         override val message: String? = null,
-        val elementList: List<ComponentDescription>) : Response
+        val elementList: List<RemoteComponent>) : Response
 
 data class ListResponse(
         override val status: ResponseStatus = SUCCESS,
         override val message: String? = null,
         val list: List<Any?>
+): Response
+
+data class BooleanResponse(
+        override val status: ResponseStatus = SUCCESS,
+        override val message: String? = null,
+        val value: Boolean
+): Response
+
+data class ByteResponse(
+        override val status: ResponseStatus = SUCCESS,
+        override val message: String? = null,
+        val bytes: ByteArray
 ): Response
 
 inline fun <reified R : Response> Content.asResponse(): R {

@@ -1,13 +1,15 @@
 package model.ideaModel.mainApp
 
 import com.jetbrains.test.RemoteRobot
-import com.jetbrains.test.data.ComponentDescription
-import com.jetbrains.test.fixtures.BaseFixture
-import model.ideaModel.common.ContainerFixture
+import com.jetbrains.test.data.RemoteComponent
+import model.ideaModel.common.IdeContainerFixture
 import utils.pressingKey
 import java.awt.event.KeyEvent
 
-class JBTerminalPanelFixture(remoteRobot: RemoteRobot, description: ComponentDescription) : ContainerFixture(remoteRobot, description) {
+class JBTerminalPanelFixture(
+        remoteRobot: RemoteRobot,
+        remoteComponent: RemoteComponent) : IdeContainerFixture(remoteRobot, remoteComponent) {
+
     fun enterCommand(cmd: String) = execute { r, _ ->
         r.enterText(cmd)
         r.pressAndReleaseKey(KeyEvent.VK_ENTER)

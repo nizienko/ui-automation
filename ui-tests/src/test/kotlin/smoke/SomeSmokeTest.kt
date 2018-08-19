@@ -3,6 +3,7 @@ package smoke
 import com.jetbrains.test.RemoteRobot
 import model.ideaModel.IdeaApp
 import org.junit.jupiter.api.Test
+import java.lang.Thread.sleep
 
 
 class SomeSmokeTest {
@@ -15,14 +16,18 @@ class SomeSmokeTest {
         with(app) {
             welcomeScreen {
                 createNewProjectLink.click()
+                jDialog("New Project") {
+                    jbList("Java").selectItem("Empty Project")
+                    jButton("Next").click()
+                    jButton("Finish").click()
+                }
+                jDialog("Project Structure") {
+                    jButton("Cancel").click()
+                }
             }
-            dialog("New Project") {
-                jbList("Java").selectItem("Empty Project")
-                jButton("Next").click()
-                jButton("Finish").click()
-            }
-            dialog("Project Structure") {
-                jButton("Cancel").click()
+            ideaFrame {
+
+                println(title)
             }
         }
     }
@@ -33,7 +38,7 @@ class SomeSmokeTest {
             ideaFrame {
                 terminalButton.click()
                 terminalPanel.enterCommand("top")
-                java.lang.Thread.sleep(5000)
+                sleep(5000)
                 terminalPanel.sendCancel()
                 terminalButton.click()
             }
@@ -44,7 +49,23 @@ class SomeSmokeTest {
     fun chooseSettingsMenu() {
         with(app) {
             ideaFrame {
-                mainMenu.openMenu("File").onActiveMenuSelect("Settings...")
+                openSettings()
+                jDialog("Settings") {
+                    jbList("Appearance & Behavior").selectItem("Plugins")
+                    jbList("Android Support").selectItem("EditorConfig")
+
+                }
+            }
+        }
+    }
+
+    @Test
+    fun checkIndexing() {
+        with(app) {
+            ideaFrame {
+                indexingSensitive {
+                    println("Indexing finished")
+                }
             }
         }
     }
