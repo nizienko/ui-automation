@@ -28,7 +28,6 @@ class SomeSmokeTest {
                 }
             }
             ideaFrame {
-
                 println(title)
             }
         }

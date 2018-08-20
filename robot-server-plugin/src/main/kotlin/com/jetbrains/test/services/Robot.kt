@@ -2,63 +2,82 @@ package com.jetbrains.test.services
 
 import com.jetbrains.test.data.ObjectContainer
 import com.jetbrains.test.data.RemoteComponent
-import com.jetbrains.test.data.serializeToBytes
 import com.jetbrains.test.utils.LimitedMap
 import org.fest.swing.core.BasicRobot
 import org.fest.swing.core.Robot
+import org.fest.swing.timing.Wait
 import java.awt.Component
 import java.awt.Container
 import java.io.Serializable
-import java.lang.StringBuilder
 import java.util.*
-
 
 private val componentStorage by lazy { LimitedMap<String, Component>() }
 private val lambdaLoader by lazy { LambdaLoader() }
+private const val FIND_SECONDS_TO_WAIT = 10L
 val robot by lazy { BasicRobot.robotWithCurrentAwtHierarchy()!! }
 
-fun find(containerId: String? = null, lambdaContainer: ObjectContainer): RemoteComponent {
+
+fun find(lambdaContainer: ObjectContainer): RemoteComponent {
     val lambda = lambdaLoader.getFunction<(c: Component) -> Boolean>(lambdaContainer)
-    return if (containerId == null) {
-        val c = robot.finder().find { lambda(it) }
-        val uid = UUID.randomUUID().toString()
-        componentStorage[uid] = c
-        c.toRemoteComponent(uid)
-    } else {
-        val component = componentStorage[containerId]
-                ?: throw IllegalStateException("Unknown component id $containerId")
-        if (component is Container) {
-            val c = robot.finder().find { lambda(it) }
-            val uid = UUID.randomUUID().toString()
-            componentStorage[uid] = c
-            return c.toRemoteComponent(uid)
-        } else throw IllegalStateException("Component is not a container")
+
+    Wait.seconds(FIND_SECONDS_TO_WAIT).expecting("matching " + lambda.toString()).until {
+        robot.finder().findAll { lambda(it) }.isNotEmpty()
     }
+    val c = robot.finder().find { lambda(it) }
+    val uid = UUID.randomUUID().toString()
+    componentStorage[uid] = c
+    return c.toRemoteComponent(uid)
 }
 
-fun findAll(containerId: String? = null, lambdaContainer: ObjectContainer): List<RemoteComponent> {
+fun find(containerId: String, lambdaContainer: ObjectContainer): RemoteComponent {
     val lambda = lambdaLoader.getFunction<(c: Component) -> Boolean>(lambdaContainer)
-    if (containerId == null) {
+
+    val component = componentStorage[containerId]
+            ?: throw IllegalStateException("Unknown component id $containerId")
+    if (component is Container) {
+        Wait.seconds(FIND_SECONDS_TO_WAIT).expecting("matching " + lambda.toString()).until {
+            robot.finder().findAll(component) { lambda(it) }.isNotEmpty()
+        }
+        val c = robot.finder().find(component) { lambda(it) }
+        val uid = UUID.randomUUID().toString()
+        componentStorage[uid] = c
+        return c.toRemoteComponent(uid)
+    } else throw IllegalStateException("Component is not a container")
+}
+
+fun findAll(lambdaContainer: ObjectContainer): List<RemoteComponent> {
+    val lambda = lambdaLoader.getFunction<(c: Component) -> Boolean>(lambdaContainer)
+
+    Wait.seconds(FIND_SECONDS_TO_WAIT).expecting("matching " + lambda.toString()).until {
+        robot.finder().findAll { lambda(it) }.isNotEmpty()
+    }
+    return robot.finder()
+            .findAll { lambda(it) }
+            .map {
+                val uid = UUID.randomUUID().toString()
+                componentStorage[uid] = it
+                return@map it.toRemoteComponent(uid)
+            }
+
+}
+
+fun findAll(containerId: String, lambdaContainer: ObjectContainer): List<RemoteComponent> {
+    val lambda = lambdaLoader.getFunction<(c: Component) -> Boolean>(lambdaContainer)
+    val component = componentStorage[containerId]
+            ?: throw IllegalStateException("Unknown component id $containerId")
+    if (component is Container) {
+        Wait.seconds(FIND_SECONDS_TO_WAIT).expecting("matching " + lambda.toString()).until {
+            robot.finder().findAll { lambda(it) }.isNotEmpty()
+        }
         return robot.finder()
-                .findAll { lambda(it) }
+                .findAll(component) { lambda(it) }
                 .map {
                     val uid = UUID.randomUUID().toString()
                     componentStorage[uid] = it
                     return@map it.toRemoteComponent(uid)
                 }
-    } else {
-        val component = componentStorage[containerId]
-                ?: throw IllegalStateException("Unknown component id $containerId")
-        if (component is Container) {
-            return robot.finder()
-                    .findAll(component) { lambda(it) }
-                    .map {
-                        val uid = UUID.randomUUID().toString()
-                        componentStorage[uid] = it
-                        return@map it.toRemoteComponent(uid)
-                    }
-        } else throw IllegalStateException("Component is not a container")
-    }
+    } else throw IllegalStateException("Component is not a container")
+
 }
 
 fun hierarchy(): List<Any> {

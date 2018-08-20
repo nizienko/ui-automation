@@ -18,6 +18,6 @@ class IdeaApp(val robot: RemoteRobot) {
     }
 
     fun welcomeScreen(function: FlatWelcomeFrameFixture.() -> Unit): FlatWelcomeFrameFixture {
-        return robot.find<FlatWelcomeFrameFixture> { it is FlatWelcomeFrame }.apply(function)
+        return robot.find<FlatWelcomeFrameFixture> { it is FlatWelcomeFrame && it.isShowing }.apply(function)
     }
 }
