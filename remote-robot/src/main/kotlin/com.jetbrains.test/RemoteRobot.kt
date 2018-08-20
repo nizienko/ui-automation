@@ -35,7 +35,7 @@ class RemoteRobot(
         }
 
         return Request.Post(urlString)
-                .bodyString(gson.toJson(filter.pack("find ${T::class.java}")), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(filter.pack()), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<FindComponentsResponse>().elementList
                 .map {
                     T::class.java.getConstructor(
@@ -55,7 +55,7 @@ class RemoteRobot(
             "$url/components"
         }
         return Request.Post(urlString)
-                .bodyString(gson.toJson(filter.pack("findAll ${T::class.java}")), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(filter.pack()), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<FindComponentsResponse>().elementList
                 .map {
                     T::class.java.getConstructor(
@@ -67,19 +67,19 @@ class RemoteRobot(
 
     fun execute(action: (Robot) -> Unit) {
         Request.Post("$url/execute")
-                .bodyString(gson.toJson(action.pack("executing without component")), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(action.pack()), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<CommonResponse>()
     }
 
     fun execute(element: Fixture, action: (Robot, Component) -> Unit) {
         Request.Post("$url/${element.remoteComponent.id}/execute")
-                .bodyString(gson.toJson(action.pack("executing with ${element::class.java}")), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(action.pack()), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<CommonResponse>()
     }
 
     fun retrieveText(element: Fixture, function: (Robot, Component) -> String): String {
         return Request.Post("$url/${element.remoteComponent.id}/retrieveText")
-                .bodyString(gson.toJson(function.pack("retrieving text with ${element::class.java}")), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(function.pack()), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<CommonResponse>().message
                 ?: throw AssertionError("Can't retrieve text(is null)")
     }
@@ -92,13 +92,13 @@ class RemoteRobot(
 
     inline fun <reified T : Serializable> retrieve(noinline function: (Robot) -> T): T {
         return Request.Post("$url/retrieveAny")
-                .bodyString(gson.toJson(function.pack("retrieving an object ${T::class.java}")), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(function.pack()), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<ByteResponse>().bytes.deserialize()
     }
 
     inline fun <reified T : Serializable> retrieve(element: Fixture, noinline function: (Robot, Component) -> T): T {
         return Request.Post("$url/${element.remoteComponent.id}/retrieveAny")
-                .bodyString(gson.toJson(function.pack("retrieving an object ${T::class.java} with ${element::class.java}")), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(function.pack()), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<ByteResponse>().bytes.deserialize()
     }
 }
