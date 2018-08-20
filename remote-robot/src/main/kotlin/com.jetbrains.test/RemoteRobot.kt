@@ -12,23 +12,21 @@ import java.awt.Component
 import java.io.Serializable
 
 class RemoteRobot(
-        val url: String,
-        val defaultFindAttempts: Int = 10
+        val url: String
 ) {
     val gson = Gson()
 
-    inline fun <reified T : Fixture> find(noinline filter: (c: Component) -> Boolean, attemptsCount: Int = defaultFindAttempts): T {
-        return find(null, filter, attemptsCount)
+    inline fun <reified T : Fixture> find(noinline filter: (c: Component) -> Boolean): T {
+        return find(null, filter)
     }
 
-    inline fun <reified T : Fixture> findAll(noinline filter: (c: Component) -> Boolean, attemptsCount: Int = defaultFindAttempts): List<T> {
-        return findAll(null, filter, attemptsCount)
+    inline fun <reified T : Fixture> findAll(noinline filter: (c: Component) -> Boolean): List<T> {
+        return findAll(null, filter)
     }
 
     inline fun <reified T : Fixture> find(
             container: Fixture?,
-            noinline filter: (c: Component) -> Boolean,
-            attemptsCount: Int = defaultFindAttempts): T {
+            noinline filter: (c: Component) -> Boolean): T {
 
         val urlString = if (container != null) {
             "$url/${container.remoteComponent.id}/component"
@@ -36,38 +34,35 @@ class RemoteRobot(
             "$url/component"
         }
 
-        return attempt(attemptsCount) {
-            Request.Post(urlString)
-                    .bodyString(gson.toJson(filter.pack("find ${T::class.java}")), ContentType.APPLICATION_JSON)
-                    .execute().returnContent().asResponse<FindComponentsResponse>().elementList
-                    .map {
-                        T::class.java.getConstructor(
-                                RemoteRobot::class.java, RemoteComponent::class.java
-                        ).newInstance(this, it)
-                    }.first()
-        }
+        return Request.Post(urlString)
+                .bodyString(gson.toJson(filter.pack("find ${T::class.java}")), ContentType.APPLICATION_JSON)
+                .execute().returnContent().asResponse<FindComponentsResponse>().elementList
+                .map {
+                    T::class.java.getConstructor(
+                            RemoteRobot::class.java, RemoteComponent::class.java
+                    ).newInstance(this, it)
+                }.first()
+
     }
 
     inline fun <reified T : Fixture> findAll(
             container: Fixture?,
-            noinline filter: (c: Component) -> Boolean,
-            attemptsCount: Int = defaultFindAttempts): List<T> {
+            noinline filter: (c: Component) -> Boolean): List<T> {
 
         val urlString = if (container != null) {
             "$url/${container.remoteComponent.id}/components"
         } else {
             "$url/components"
         }
-        return attempt(attemptsCount) {
-            Request.Post(urlString)
-                    .bodyString(gson.toJson(filter.pack("findAll ${T::class.java}")), ContentType.APPLICATION_JSON)
-                    .execute().returnContent().asResponse<FindComponentsResponse>().elementList
-                    .map {
-                        T::class.java.getConstructor(
-                                RemoteRobot::class.java, RemoteComponent::class.java
-                        ).newInstance(this, it)
-                    }
-        }
+        return Request.Post(urlString)
+                .bodyString(gson.toJson(filter.pack("findAll ${T::class.java}")), ContentType.APPLICATION_JSON)
+                .execute().returnContent().asResponse<FindComponentsResponse>().elementList
+                .map {
+                    T::class.java.getConstructor(
+                            RemoteRobot::class.java, RemoteComponent::class.java
+                    ).newInstance(this, it)
+                }
+
     }
 
     fun execute(action: (Robot) -> Unit) {

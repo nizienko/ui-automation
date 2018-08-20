@@ -37,7 +37,7 @@ inline fun <O> tryTimes(n: Int, onError: () -> Unit = {},
             }
         }
     }
-    val reason = finalError?.let { finalError } ?: IllegalStateException("Íå óäàëîñü âûïîëíèòü äåéñòâèå")
+    val reason = finalError?.let { finalError } ?: IllegalStateException("Unknown error")
 
     throw finalException(reason)
 }
