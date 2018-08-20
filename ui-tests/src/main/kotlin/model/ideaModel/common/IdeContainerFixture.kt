@@ -5,7 +5,6 @@ import com.jetbrains.test.RemoteRobot
 import com.jetbrains.test.data.RemoteComponent
 import com.jetbrains.test.fixtures.ComponentFixture
 import com.jetbrains.test.fixtures.ContainerFixture
-import utils.waitWhileIndexing
 import javax.swing.JButton
 import javax.swing.JDialog
 
