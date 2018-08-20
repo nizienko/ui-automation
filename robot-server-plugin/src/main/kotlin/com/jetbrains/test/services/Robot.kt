@@ -13,7 +13,7 @@ import java.util.*
 
 private val componentStorage by lazy { LimitedMap<String, Component>() }
 private val lambdaLoader by lazy { LambdaLoader() }
-private const val FIND_SECONDS_TO_WAIT = 10L
+private const val FIND_SECONDS_TO_WAIT = 1L
 val robot by lazy { BasicRobot.robotWithCurrentAwtHierarchy()!! }
 
 

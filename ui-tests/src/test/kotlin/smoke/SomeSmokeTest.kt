@@ -23,11 +23,12 @@ class SomeSmokeTest {
                     jButton("Next").click()
                     jButton("Finish").click()
                 }
+
+            }
+            ideaFrame {
                 jDialog("Project Structure") {
                     jButton("Cancel").click()
                 }
-            }
-            ideaFrame {
                 println(title)
             }
         }

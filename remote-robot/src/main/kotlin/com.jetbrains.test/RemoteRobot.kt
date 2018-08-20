@@ -12,21 +12,23 @@ import java.awt.Component
 import java.io.Serializable
 
 class RemoteRobot(
-        val url: String
+        val url: String,
+        val defaultFindAttempts: Int = 10
 ) {
     val gson = Gson()
 
-    inline fun <reified T : Fixture> find(noinline filter: (c: Component) -> Boolean): T {
-        return find(null, filter)
+    inline fun <reified T : Fixture> find(noinline filter: (c: Component) -> Boolean, attemptsCount: Int = defaultFindAttempts): T {
+        return find(null, filter, attemptsCount)
     }
 
-    inline fun <reified T : Fixture> findAll(noinline filter: (c: Component) -> Boolean): List<T> {
-        return findAll(null, filter)
+    inline fun <reified T : Fixture> findAll(noinline filter: (c: Component) -> Boolean, attemptsCount: Int = defaultFindAttempts): List<T> {
+        return findAll(null, filter, attemptsCount)
     }
 
     inline fun <reified T : Fixture> find(
             container: Fixture?,
-            noinline filter: (c: Component) -> Boolean): T {
+            noinline filter: (c: Component) -> Boolean,
+            attemptsCount: Int = defaultFindAttempts): T {
 
         val urlString = if (container != null) {
             "$url/${container.remoteComponent.id}/component"
@@ -34,51 +36,57 @@ class RemoteRobot(
             "$url/component"
         }
 
-        return Request.Post(urlString)
-                .bodyString(gson.toJson(filter.pack()), ContentType.APPLICATION_JSON)
-                .execute().returnContent().asResponse<FindComponentsResponse>().elementList
-                .map {
-                    T::class.java.getConstructor(
-                            RemoteRobot::class.java, RemoteComponent::class.java
-                    ).newInstance(this, it)
-                }.first()
+        return attempt(attemptsCount) {
+            Request.Post(urlString)
+                    .bodyString(gson.toJson(filter.pack("find ${T::class.java}")), ContentType.APPLICATION_JSON)
+                    .execute().returnContent().asResponse<FindComponentsResponse>().elementList
+                    .map {
+                        T::class.java.getConstructor(
+                                RemoteRobot::class.java, RemoteComponent::class.java
+                        ).newInstance(this, it)
+                    }.first()
+        }
     }
 
     inline fun <reified T : Fixture> findAll(
             container: Fixture?,
-            noinline filter: (c: Component) -> Boolean): List<T> {
+            noinline filter: (c: Component) -> Boolean,
+            attemptsCount: Int = defaultFindAttempts): List<T> {
 
         val urlString = if (container != null) {
             "$url/${container.remoteComponent.id}/components"
         } else {
             "$url/components"
         }
-        return Request.Post(urlString)
-                .bodyString(gson.toJson(filter.pack()), ContentType.APPLICATION_JSON)
-                .execute().returnContent().asResponse<FindComponentsResponse>().elementList
-                .map {
-                    T::class.java.getConstructor(
-                            RemoteRobot::class.java, RemoteComponent::class.java
-                    ).newInstance(this, it)
-                }
+        return attempt(attemptsCount) {
+            Request.Post(urlString)
+                    .bodyString(gson.toJson(filter.pack("findAll ${T::class.java}")), ContentType.APPLICATION_JSON)
+                    .execute().returnContent().asResponse<FindComponentsResponse>().elementList
+                    .map {
+                        T::class.java.getConstructor(
+                                RemoteRobot::class.java, RemoteComponent::class.java
+                        ).newInstance(this, it)
+                    }
+        }
     }
 
     fun execute(action: (Robot) -> Unit) {
         Request.Post("$url/execute")
-                .bodyString(gson.toJson(action.pack()), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(action.pack("executing without component")), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<CommonResponse>()
     }
 
     fun execute(element: Fixture, action: (Robot, Component) -> Unit) {
         Request.Post("$url/${element.remoteComponent.id}/execute")
-                .bodyString(gson.toJson(action.pack()), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(action.pack("executing with ${element::class.java}")), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<CommonResponse>()
     }
 
     fun retrieveText(element: Fixture, function: (Robot, Component) -> String): String {
         return Request.Post("$url/${element.remoteComponent.id}/retrieveText")
-                .bodyString(gson.toJson(function.pack()), ContentType.APPLICATION_JSON)
-                .execute().returnContent().asResponse<CommonResponse>().message?: throw AssertionError("Can't retrieve text(is null)")
+                .bodyString(gson.toJson(function.pack("retrieving text with ${element::class.java}")), ContentType.APPLICATION_JSON)
+                .execute().returnContent().asResponse<CommonResponse>().message
+                ?: throw AssertionError("Can't retrieve text(is null)")
     }
 
 /*    fun retrieveBoolean(element: Fixture, function: (Robot, Component) -> Boolean): Boolean {
@@ -89,13 +97,13 @@ class RemoteRobot(
 
     inline fun <reified T : Serializable> retrieve(noinline function: (Robot) -> T): T {
         return Request.Post("$url/retrieveAny")
-                .bodyString(gson.toJson(function.pack()), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(function.pack("retrieving an object ${T::class.java}")), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<ByteResponse>().bytes.deserialize()
     }
 
     inline fun <reified T : Serializable> retrieve(element: Fixture, noinline function: (Robot, Component) -> T): T {
         return Request.Post("$url/${element.remoteComponent.id}/retrieveAny")
-                .bodyString(gson.toJson(function.pack()), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(function.pack("retrieving an object ${T::class.java} with ${element::class.java}")), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<ByteResponse>().bytes.deserialize()
     }
 }
