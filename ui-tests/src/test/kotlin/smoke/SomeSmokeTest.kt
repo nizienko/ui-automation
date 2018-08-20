@@ -17,16 +17,14 @@ class SomeSmokeTest {
     @Test
     fun createNewProject() {
         with(app) {
-            attempt(onError = { println("fuck")}) {
-                welcomeScreen {
-                    createNewProjectLink.click()
-                    jDialog("New Project") {
-                        jbList("Java").selectItem("Empty Project")
-                        jButton("Next").click()
-                        jButton("Finish").click()
-                    }
-
+            welcomeScreen {
+                createNewProjectLink.click()
+                jDialog("New Project") {
+                    jbList("Java").selectItem("Empty Project")
+                    jButton("Next").click()
+                    jButton("Finish").click()
                 }
+
             }
             ideaFrame {
                 jDialog("Project Structure") {
