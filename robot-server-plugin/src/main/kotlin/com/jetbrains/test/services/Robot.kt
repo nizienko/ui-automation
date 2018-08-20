@@ -83,9 +83,18 @@ fun retrieveText(componentId: String, actionContainer: ObjectContainer): String 
     return lambdaLoader.getFunction<(Robot, Component) -> String>(actionContainer).invoke(robot, component)
 }
 
-fun retrieveBoolean(componentId: String, actionContainer: ObjectContainer): Boolean {
+/*fun retrieveBoolean(componentId: String, actionContainer: ObjectContainer): Boolean {
     val component = componentStorage[componentId] ?: throw IllegalStateException("Unknown component id $componentId")
     return lambdaLoader.getFunction<(Robot, Component) -> Boolean>(actionContainer).invoke(robot, component)
+}*/
+
+fun retrieveAny(actionContainer: ObjectContainer): Serializable {
+    return lambdaLoader.getFunction<(Robot) -> Serializable>(actionContainer).invoke(robot)
+}
+
+fun retrieveAny(componentId: String, actionContainer: ObjectContainer): Serializable {
+    val component = componentStorage[componentId] ?: throw IllegalStateException("Unknown component id $componentId")
+    return lambdaLoader.getFunction<(Robot, Component) -> Serializable>(actionContainer).invoke(robot, component)
 }
 
 data class DescribedComponent(

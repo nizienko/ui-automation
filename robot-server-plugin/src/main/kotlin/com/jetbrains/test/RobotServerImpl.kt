@@ -92,10 +92,21 @@ class RobotServerImpl : RobotServer {
                         CommonResponse(message = retrieveText(id, call.receiveJson()))
                     }
                 }
-                post("/{id}/retrieveBoolean") {
+/*                post("/{id}/retrieveBoolean") {
                     call.dataRequest {
                         val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
                         BooleanResponse(value = retrieveBoolean(id, call.receiveJson()))
+                    }
+                }*/
+                post("/retrieveAny") {
+                    call.dataRequest {
+                        ByteResponse(className = "", bytes = retrieveAny(call.receiveJson()).serializeToBytes())
+                    }
+                }
+                post("/{id}/retrieveAny") {
+                    call.dataRequest {
+                        val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
+                        ByteResponse(className = "", bytes = retrieveAny(id, call.receiveJson()).serializeToBytes())
                     }
                 }
             }

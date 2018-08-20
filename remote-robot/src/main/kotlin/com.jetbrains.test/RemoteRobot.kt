@@ -9,6 +9,7 @@ import org.apache.http.client.fluent.Request
 import org.apache.http.entity.ContentType
 import org.fest.swing.core.Robot
 import java.awt.Component
+import java.io.Serializable
 
 class RemoteRobot(
         val url: String
@@ -62,14 +63,14 @@ class RemoteRobot(
                 }
     }
 
-    fun execute(element: Fixture, action: (Robot, Component) -> Unit) {
-        Request.Post("$url/${element.remoteComponent.id}/execute")
+    fun execute(action: (Robot) -> Unit) {
+        Request.Post("$url/execute")
                 .bodyString(gson.toJson(action.pack()), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<CommonResponse>()
     }
 
-    fun execute(action: (Robot) -> Unit) {
-        Request.Post("$url/execute")
+    fun execute(element: Fixture, action: (Robot, Component) -> Unit) {
+        Request.Post("$url/${element.remoteComponent.id}/execute")
                 .bodyString(gson.toJson(action.pack()), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<CommonResponse>()
     }
@@ -80,10 +81,22 @@ class RemoteRobot(
                 .execute().returnContent().asResponse<CommonResponse>().message?: throw AssertionError("Can't retrieve text(is null)")
     }
 
-    fun retrieveBoolean(element: Fixture, function: (Robot, Component) -> Boolean): Boolean {
+/*    fun retrieveBoolean(element: Fixture, function: (Robot, Component) -> Boolean): Boolean {
         return Request.Post("$url/${element.remoteComponent.id}/retrieveBoolean")
                 .bodyString(gson.toJson(function.pack()), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<BooleanResponse>().value
+    }*/
+
+    inline fun <reified T : Serializable> retrieve(noinline function: (Robot) -> T): T {
+        return Request.Post("$url/retrieveAny")
+                .bodyString(gson.toJson(function.pack()), ContentType.APPLICATION_JSON)
+                .execute().returnContent().asResponse<ByteResponse>().bytes.deserialize()
+    }
+
+    inline fun <reified T : Serializable> retrieve(element: Fixture, noinline function: (Robot, Component) -> T): T {
+        return Request.Post("$url/${element.remoteComponent.id}/retrieveAny")
+                .bodyString(gson.toJson(function.pack()), ContentType.APPLICATION_JSON)
+                .execute().returnContent().asResponse<ByteResponse>().bytes.deserialize()
     }
 }
 

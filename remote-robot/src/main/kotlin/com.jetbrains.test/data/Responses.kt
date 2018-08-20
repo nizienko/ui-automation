@@ -35,6 +35,7 @@ data class BooleanResponse(
 data class ByteResponse(
         override val status: ResponseStatus = SUCCESS,
         override val message: String? = null,
+        val className: String,
         val bytes: ByteArray
 ): Response
 

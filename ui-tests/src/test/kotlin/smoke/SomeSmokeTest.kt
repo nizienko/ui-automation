@@ -1,5 +1,7 @@
 package smoke
 
+import com.intellij.openapi.project.DumbService
+import com.intellij.testFramework.LightPlatformTestCase.getProject
 import com.jetbrains.test.RemoteRobot
 import model.ideaModel.IdeaApp
 import org.junit.jupiter.api.Test
@@ -67,6 +69,13 @@ class SomeSmokeTest {
                     println("Indexing finished")
                 }
             }
+        }
+    }
+
+    @Test
+    fun retrieveAnyTest() {
+        with(app) {
+            println(robot.retrieve { DumbService.getInstance(getProject()).isDumb })
         }
     }
 }
