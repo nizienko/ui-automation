@@ -42,7 +42,6 @@ data class ByteResponse(
 
 inline fun <reified R : Response> Content.asResponse(): R {
     val responseString = this.asString()
-    println(responseString)
     val response = try {
         gson.fromJson(responseString, R::class.java)
     } catch (e: Throwable) {
@@ -56,6 +55,6 @@ inline fun <reified R : Response> Content.asResponse(): R {
     return response as R
 }
 
-class IdeaSideError(exceptionClassName: String, message: String) : IllegalStateException("$exceptionClassName: $message")
+class IdeaSideError(exceptionClassName: String, message: String) : IllegalArgumentException("$exceptionClassName: $message")
 
 enum class ResponseStatus { SUCCESS, ERROR }

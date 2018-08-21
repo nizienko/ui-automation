@@ -1,5 +1,7 @@
 package utils
 
+import model.ideaModel.IdeaApp
+
 
 inline fun waitFor(seconds: Int, condition: () -> Boolean) {
     val endTime = System.currentTimeMillis() + seconds * 1000
@@ -11,4 +13,8 @@ inline fun waitFor(seconds: Int, condition: () -> Boolean) {
             Thread.sleep(1000)
         }
     }
+}
+
+inline fun test(app: IdeaApp, test: IdeaApp.()->Unit) {
+    app.test()
 }

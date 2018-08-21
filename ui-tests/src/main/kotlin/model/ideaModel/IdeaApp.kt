@@ -7,7 +7,6 @@ import model.ideaModel.welcomeScreen.FlatWelcomeFrameFixture
 import javax.swing.JFrame
 
 class IdeaApp(val robot: RemoteRobot) {
-
     inline fun ideaFrame(function: IdeFrameFixture.() -> Unit) {
         robot.find<IdeFrameFixture> {
             it is JFrame
