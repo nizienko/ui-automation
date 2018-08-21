@@ -19,11 +19,11 @@ val robot by lazy { BasicRobot.robotWithCurrentAwtHierarchy()!! }
 
 fun find(lambdaContainer: ObjectContainer): RemoteComponent {
     val lambda = lambdaLoader.getFunction<(c: Component) -> Boolean>(lambdaContainer)
-    ignoreWaitTimedOutError {
+/*    ignoreWaitTimedOutError {
         Wait.seconds(FIND_SECONDS_TO_WAIT).expecting("matching " + lambda.toString()).until {
             robot.finder().findAll { lambda(it) }.isNotEmpty()
         }
-    }
+    }*/
     val c = robot.finder().find { lambda(it) }
     val uid = UUID.randomUUID().toString()
     componentStorage[uid] = c
@@ -36,11 +36,11 @@ fun find(containerId: String, lambdaContainer: ObjectContainer): RemoteComponent
     val component = componentStorage[containerId]
             ?: throw IllegalStateException("Unknown component id $containerId")
     if (component is Container) {
-        ignoreWaitTimedOutError {
+/*        ignoreWaitTimedOutError {
             Wait.seconds(FIND_SECONDS_TO_WAIT).expecting("matching " + lambda.toString()).until {
                 robot.finder().findAll(component) { lambda(it) }.isNotEmpty()
             }
-        }
+        }*/
         val c = robot.finder().find(component) { lambda(it) }
         val uid = UUID.randomUUID().toString()
         componentStorage[uid] = c
