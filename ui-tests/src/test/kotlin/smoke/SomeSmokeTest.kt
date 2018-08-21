@@ -6,6 +6,7 @@ import com.jetbrains.test.RemoteRobot
 import com.jetbrains.test.attempt
 import model.ideaModel.IdeaApp
 import org.junit.jupiter.api.Test
+import utils.optional
 import java.lang.Thread.sleep
 
 
@@ -24,11 +25,17 @@ class SomeSmokeTest {
                     jButton("Next").click()
                     jButton("Finish").click()
                 }
-
             }
             ideaFrame {
-                jDialog("Project Structure") {
-                    jButton("Cancel").click()
+                optional {
+                    jDialog("Tip of the Day") {
+                        jButton("Close").click()
+                    }
+                }
+                indexingSensitive {
+                    jDialog("Project Structure") {
+                        jButton("Cancel").click()
+                    }
                 }
                 println(title)
             }

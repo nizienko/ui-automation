@@ -73,7 +73,6 @@ class RobotServerImpl : RobotServer {
                     call.dataRequest {
                         ListResponse(list = hierarchy())
                     }
-                    val y: ActionMenu
                 }
                 post("/execute") {
                     call.commonRequest {
@@ -128,7 +127,7 @@ suspend inline fun ApplicationCall.commonRequest(code: () -> Unit) {
         CommonResponse()
     } catch (e: Throwable) {
         e.printStackTrace()
-        CommonResponse(ResponseStatus.ERROR, e.message)
+        CommonResponse(ResponseStatus.ERROR, e.message, e::class.java.name)
     }
     this.respond(response)
 }
@@ -138,7 +137,7 @@ suspend inline fun ApplicationCall.dataRequest(code: () -> Response) {
         code()
     } catch (e: Throwable) {
         e.printStackTrace()
-        CommonResponse(ResponseStatus.ERROR, e.message)
+        CommonResponse(ResponseStatus.ERROR, e.message, e::class.java.name)
     }
     this.respond(response)
 }

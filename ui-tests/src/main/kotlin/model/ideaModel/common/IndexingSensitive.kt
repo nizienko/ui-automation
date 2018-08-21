@@ -1,6 +1,7 @@
 package model.ideaModel.common
 
 import com.jetbrains.test.RemoteRobot
+import com.jetbrains.test.data.IdeaSideError
 import com.jetbrains.test.fixtures.ComponentFixture
 import utils.waitFor
 import javax.swing.JLabel
@@ -11,6 +12,7 @@ interface IndexingSensitive {
     fun indexingSensitive(action: () -> Unit) {
         waitWhileIndexing()
         try {
+            println("No indexing now")
             action()
         } catch (e: Throwable) {
             if (isIndexingInProgress()) {
@@ -32,11 +34,15 @@ interface IndexingSensitive {
     }
 
     private fun isIndexingInProgress(): Boolean {
-        return remoteRobot.findAll<ComponentFixture> {
-            it is JLabel && ("Indexing..." == it.text
-                    || "Scanning files to index..." == it.text
-                    || "Updating Indices" == it.text)
-        }.isNotEmpty()
+        return try {
+            remoteRobot.findAll<ComponentFixture> {
+                it is JLabel && ("Indexing..." == it.text
+                        || "Scanning files to index..." == it.text
+                        || "Updating Indices" == it.text)
+            }.isNotEmpty()
+        } catch (e: IdeaSideError) {
+            false
+        }
     }
 }
 

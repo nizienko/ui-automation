@@ -13,7 +13,8 @@ interface Response {
 
 data class CommonResponse(
         override val status: ResponseStatus = SUCCESS,
-        override val message: String? = null) : Response
+        override val message: String? = null,
+        val exceptionClassName: String? = null) : Response
 
 data class FindComponentsResponse(
         override val status: ResponseStatus = SUCCESS,
@@ -24,28 +25,30 @@ data class ListResponse(
         override val status: ResponseStatus = SUCCESS,
         override val message: String? = null,
         val list: List<Any?>
-): Response
+) : Response
 
 data class BooleanResponse(
         override val status: ResponseStatus = SUCCESS,
         override val message: String? = null,
         val value: Boolean
-): Response
+) : Response
 
 data class ByteResponse(
         override val status: ResponseStatus = SUCCESS,
         override val message: String? = null,
         val className: String,
         val bytes: ByteArray
-): Response
+) : Response
 
 inline fun <reified R : Response> Content.asResponse(): R {
     val responseString = this.asString()
     val response = gson.fromJson(responseString, R::class.java)
-    if (response.status != SUCCESS) {
-        throw IllegalStateException(response.message ?: "Unknown error")
+    if (response.status != SUCCESS && response is CommonResponse) {
+        throw IdeaSideError(response.exceptionClassName ?: "Unknown error", response.message ?: "Unknown message")
     }
     return response
 }
+
+class IdeaSideError(exceptionClassName: String, message: String) : AssertionError("$exceptionClassName: $message")
 
 enum class ResponseStatus { SUCCESS, ERROR }

@@ -8,7 +8,7 @@ import javax.swing.JFrame
 
 class IdeaApp(val robot: RemoteRobot) {
 
-    fun ideaFrame(function: IdeFrameFixture.() -> Unit) {
+    inline fun ideaFrame(function: IdeFrameFixture.() -> Unit) {
         robot.find<IdeFrameFixture> {
             it is JFrame
                     && it.isShowing
@@ -17,7 +17,7 @@ class IdeaApp(val robot: RemoteRobot) {
         }.function()
     }
 
-    fun welcomeScreen(function: FlatWelcomeFrameFixture.() -> Unit): FlatWelcomeFrameFixture {
+    inline fun welcomeScreen(function: FlatWelcomeFrameFixture.() -> Unit): FlatWelcomeFrameFixture {
         return robot.find<FlatWelcomeFrameFixture> { it is FlatWelcomeFrame && it.isShowing }.apply(function)
     }
 }
