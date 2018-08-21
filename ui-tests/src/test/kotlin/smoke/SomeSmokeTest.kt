@@ -3,22 +3,19 @@ package smoke
 import com.intellij.openapi.project.DumbService
 import com.intellij.testFramework.LightPlatformTestCase.getProject
 import com.jetbrains.test.RemoteRobot
-import com.jetbrains.test.attempt
 import model.ideaModel.IdeaApp
 import org.junit.jupiter.api.Test
 import utils.optional
-import utils.test
+import utils.ideaTest
 import java.lang.Thread.sleep
 
 
 class SomeSmokeTest {
-    // todo: settings
     private val url = "http://127.0.0.1:8080"
-
     private val app = IdeaApp(RemoteRobot(url))     // could be ThreadLocal for parallel runs
 
     @Test
-    fun createNewProject() = test(app) {
+    fun createNewProject() = ideaTest(app) {
         welcomeScreen {
             createNewProjectLink.click()
             jDialog("New Project") {
@@ -43,8 +40,8 @@ class SomeSmokeTest {
     }
 
     @Test
-    fun runTopInTerminal() {
-        app.ideaFrame {
+    fun runTopInTerminal() = ideaTest(app) {
+        ideaFrame {
             terminalButton.click()
             terminalPanel.enterCommand("top")
             sleep(5000)
@@ -54,31 +51,27 @@ class SomeSmokeTest {
     }
 
     @Test
-    fun chooseSettingsMenu() {
-        app.ideaFrame {
+    fun chooseSettingsMenu() = ideaTest(app) {
+        ideaFrame {
             openSettings()
-            jDialog("Settings") {
-                jbList("Appearance & Behavior").selectItem("Plugins")
-                jbList("Android Support").selectItem("EditorConfig")
+            settingsDialog {
+                treeView().click()
+                jButton("Cancel").click()
             }
         }
     }
 
     @Test
-    fun checkIndexing() {
-        with(app) {
-            ideaFrame {
-                indexingSensitive {
-                    println("Indexing finished")
-                }
+    fun checkIndexing() = ideaTest(app) {
+        ideaFrame {
+            indexingSensitive {
+                println("Indexing finished")
             }
         }
     }
 
     @Test
-    fun retrieveAnyTest() {
-        with(app) {
-            println(robot.retrieve { DumbService.getInstance(getProject()).isDumb })
-        }
+    fun retrieveAnyTest() = ideaTest(app) {
+        println(robot.retrieve { DumbService.getInstance(getProject()).isDumb })
     }
 }

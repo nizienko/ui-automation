@@ -1,4 +1,4 @@
-package model.ideaModel.mainApp
+package model.ideaModel.mainApp.terminal
 
 import com.jetbrains.test.RemoteRobot
 import com.jetbrains.test.data.RemoteComponent

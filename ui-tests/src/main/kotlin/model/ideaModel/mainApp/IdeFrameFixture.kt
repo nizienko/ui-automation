@@ -8,6 +8,9 @@ import com.jetbrains.test.data.RemoteComponent
 import com.jetbrains.test.fixtures.ComponentFixture
 import model.ideaModel.common.IdeContainerFixture
 import model.ideaModel.common.IndexingSensitive
+import model.ideaModel.mainApp.settingsDialog.SettingsDialogFixture
+import model.ideaModel.mainApp.terminal.JBTerminalPanelFixture
+import javax.swing.JDialog
 import javax.swing.JFrame
 
 class IdeFrameFixture(
@@ -29,6 +32,9 @@ class IdeFrameFixture(
 
     fun openSettings() = mainMenu.openMenu("File").select("Settings...")
 
+    inline fun settingsDialog(function: SettingsDialogFixture.() -> Unit = {}): SettingsDialogFixture {
+        return find<SettingsDialogFixture> { it is JDialog && it.isShowing && it.title == "Settings" }.apply(function)
+    }
 }
 
 
