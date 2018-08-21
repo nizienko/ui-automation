@@ -42,13 +42,22 @@ data class ByteResponse(
 
 inline fun <reified R : Response> Content.asResponse(): R {
     val responseString = this.asString()
-    val response = gson.fromJson(responseString, R::class.java)
-    if (response.status != SUCCESS && response is CommonResponse) {
-        throw IdeaSideError(response.exceptionClassName ?: "Unknown error", response.message ?: "Unknown message")
+    val response = try {
+        gson.fromJson(responseString, R::class.java)
+    } catch (e: Throwable) {
+        gson.fromJson(responseString, CommonResponse::class.java)
     }
-    return response
+    if (response.status != SUCCESS) {
+        if (response is CommonResponse) {
+            throw IdeaSideError(response.exceptionClassName ?: "Unknown error", response.message
+                    ?: "Unknown message")
+        } else {
+            throw IllegalStateException(response.message ?: "Unknown error")
+        }
+    }
+    return response as R
 }
 
-class IdeaSideError(exceptionClassName: String, message: String) : AssertionError("$exceptionClassName: $message")
+class IdeaSideError(exceptionClassName: String, message: String) : IllegalStateException("$exceptionClassName: $message")
 
 enum class ResponseStatus { SUCCESS, ERROR }

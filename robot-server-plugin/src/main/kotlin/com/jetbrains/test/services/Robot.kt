@@ -47,10 +47,6 @@ fun find(containerId: String, lambdaContainer: ObjectContainer): RemoteComponent
 
 fun findAll(lambdaContainer: ObjectContainer): List<RemoteComponent> {
     val lambda = lambdaLoader.getFunction<(c: Component) -> Boolean>(lambdaContainer)
-
-    Wait.seconds(FIND_SECONDS_TO_WAIT).expecting("matching " + lambda.toString()).until {
-        robot.finder().findAll { lambda(it) }.isNotEmpty()
-    }
     return robot.finder()
             .findAll { lambda(it) }
             .map {
@@ -66,9 +62,6 @@ fun findAll(containerId: String, lambdaContainer: ObjectContainer): List<RemoteC
     val component = componentStorage[containerId]
             ?: throw IllegalStateException("Unknown component id $containerId")
     if (component is Container) {
-        Wait.seconds(FIND_SECONDS_TO_WAIT).expecting("matching " + lambda.toString()).until {
-            robot.finder().findAll { lambda(it) }.isNotEmpty()
-        }
         return robot.finder()
                 .findAll(component) { lambda(it) }
                 .map {
@@ -101,11 +94,6 @@ fun retrieveText(componentId: String, actionContainer: ObjectContainer): String 
     val component = componentStorage[componentId] ?: throw IllegalStateException("Unknown component id $componentId")
     return lambdaLoader.getFunction<(Robot, Component) -> String>(actionContainer).invoke(robot, component)
 }
-
-/*fun retrieveBoolean(componentId: String, actionContainer: ObjectContainer): Boolean {
-    val component = componentStorage[componentId] ?: throw IllegalStateException("Unknown component id $componentId")
-    return lambdaLoader.getFunction<(Robot, Component) -> Boolean>(actionContainer).invoke(robot, component)
-}*/
 
 fun retrieveAny(actionContainer: ObjectContainer): Serializable {
     return lambdaLoader.getFunction<(Robot) -> Serializable>(actionContainer).invoke(robot)
