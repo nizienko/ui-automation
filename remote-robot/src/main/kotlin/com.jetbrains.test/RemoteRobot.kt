@@ -36,7 +36,7 @@ class RemoteRobot(
 
         return Request.Post(urlString)
                 .bodyString(gson.toJson(filter.pack()), ContentType.APPLICATION_JSON)
-                .execute().returnContent().asResponse<FindComponentsResponse>().elementList
+                .execute().returnContent().asResponse<FindComponentsResponse>().elementList!!
                 .map {
                     T::class.java.getConstructor(
                             RemoteRobot::class.java, RemoteComponent::class.java
@@ -56,7 +56,7 @@ class RemoteRobot(
         }
         return Request.Post(urlString)
                 .bodyString(gson.toJson(filter.pack()), ContentType.APPLICATION_JSON)
-                .execute().returnContent().asResponse<FindComponentsResponse>().elementList
+                .execute().returnContent().asResponse<FindComponentsResponse>().elementList!!
                 .map {
                     T::class.java.getConstructor(
                             RemoteRobot::class.java, RemoteComponent::class.java

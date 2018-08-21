@@ -19,7 +19,7 @@ data class CommonResponse(
 data class FindComponentsResponse(
         override val status: ResponseStatus = SUCCESS,
         override val message: String? = null,
-        val elementList: List<RemoteComponent>) : Response
+        val elementList: List<RemoteComponent>? = null) : Response
 
 data class ListResponse(
         override val status: ResponseStatus = SUCCESS,
@@ -42,18 +42,16 @@ data class ByteResponse(
 
 inline fun <reified R : Response> Content.asResponse(): R {
     val responseString = this.asString()
+    println(responseString)
     val response = try {
         gson.fromJson(responseString, R::class.java)
     } catch (e: Throwable) {
         gson.fromJson(responseString, CommonResponse::class.java)
     }
     if (response.status != SUCCESS) {
-        if (response is CommonResponse) {
-            throw IdeaSideError(response.exceptionClassName ?: "Unknown error", response.message
-                    ?: "Unknown message")
-        } else {
-            throw IllegalStateException(response.message ?: "Unknown error")
-        }
+        val errorResponse = gson.fromJson(responseString, CommonResponse::class.java)
+        throw IdeaSideError(errorResponse.exceptionClassName ?: "Unknown error", response.message
+                ?: "Unknown message")
     }
     return response as R
 }

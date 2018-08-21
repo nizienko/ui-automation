@@ -63,7 +63,6 @@ class SomeSmokeTest {
                 jDialog("Settings") {
                     jbList("Appearance & Behavior").selectItem("Plugins")
                     jbList("Android Support").selectItem("EditorConfig")
-
                 }
             }
         }
